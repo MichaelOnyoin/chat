@@ -1,12 +1,13 @@
 import 'server-only'
-
+import axios from 'axios'
 import {
   createAI,
   createStreamableUI,
   getMutableAIState,
   getAIState,
   streamUI,
-  createStreamableValue
+  createStreamableValue,
+  
 } from 'ai/rsc'
 import { openai } from '@ai-sdk/openai'
 
@@ -16,7 +17,8 @@ import {
   BotMessage,
   SystemMessage,
   Stock,
-  Purchase
+  Purchase,
+  
 } from '@/components/stocks'
 
 import { z } from 'zod'
@@ -25,6 +27,8 @@ import { Events } from '@/components/stocks/events'
 import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
+import { Weather } from '@/components/stocks/weather'
+import { SearchInternet } from '@/components/stocks/internet'
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -35,6 +39,7 @@ import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
+
 
 async function confirmPurchase(symbol: string, price: number, amount: number) {
   'use server'
@@ -130,6 +135,12 @@ async function submitUserMessage(content: string) {
     model: openai('gpt-3.5-turbo'),
     initial: <SpinnerMessage />,
     system: `\
+    You are an AI assistant that helps users find information
+    \nYou offer general advice in all fields 
+    \nYou have codex abilities
+    \nYou help with DIY (Do It Yourself skills) 
+    
+
     You are a stock trading conversation bot and you can help users buy stocks, step by step.
     You and the user can discuss stock prices and the user can adjust the amount of stocks they want to buy, or place an order, in the UI.
     
@@ -137,11 +148,13 @@ async function submitUserMessage(content: string) {
     - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     
+    If the user requests weather, first ask for user's city then call \`get_city_weather\` to show the weather UI.
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
-    If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
+    If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
+
     
     Besides that, you can also chat with users and do some calculations if needed.`,
     messages: [
@@ -177,6 +190,130 @@ async function submitUserMessage(content: string) {
       return textNode
     },
     tools: {
+      get_city_weather: {
+        description: 'Get the current weather for a city',
+        parameters: z.object({
+          city: z.string().describe('the city')
+        }).required(),
+        generate: async function* ({ city }) {
+          yield (<BotCard>
+                  <SpinnerMessage/>
+                  </BotCard>
+                )
+          
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'get_city_weather',
+                    toolCallId,
+                    args: { city }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'get_city_weather',
+                    toolCallId,
+                    result: city
+                  }
+                ]
+              }
+            ]
+          })
+          
+
+          return (<BotCard><Weather/></BotCard>)
+        }
+      },
+      search_the_internet: {
+        description: 'Search the internet',
+        parameters: z.object({ 
+               query: z.string().describe('the query')
+               }).required(),
+        generate: async function* ({query }) {
+          yield (
+            <BotCard>   
+              <SpinnerMessage />
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'search_the_internet',
+                    toolCallId,
+                    args: { query }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'search_the_internet',
+                    toolCallId,
+                    result: query
+                  }
+                ]
+              }
+            ]
+          })
+          return(
+            <BotCard >
+              <SearchInternet query={query}/>
+            </BotCard>
+          )
+
+         
+        }
+      },
+      // search_The_Internet: {
+      //   description: 'Search the internet',
+      //   parameters: z.object({ 
+      //     query: z.string().describe('the query')
+      //     }).required(),
+      //     generate: async function* ({ query }) 
+      //     { yield(
+      //       <BotCard>
+      //         <SearchInternet query={query} />
+      //       </BotCard>
+      //     )
+      //       const toolCallId = nanoid()
+      //       aiState.done({
+      //         ...aiState.get(),
+      //         messages: [
+      //           ...aiState.get().messages,
+                
+      //           {
+
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
         parameters: z.object({
@@ -466,7 +603,9 @@ async function submitUserMessage(content: string) {
                 ]
               }
             ]
-          })
+          }
+          
+        )
 
           return (
             <BotCard>
@@ -477,6 +616,7 @@ async function submitUserMessage(content: string) {
       }
     }
   })
+  
 
   return {
     id: nanoid(),

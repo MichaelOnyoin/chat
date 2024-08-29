@@ -51,9 +51,9 @@ export function ChatPanel({
       message: `I would like to buy 42 $DOGE`
     },
     {
-      heading: 'What are some',
-      subheading: `recent events about $DOGE?`,
-      message: `What are some recent events about $DOGE?`
+      heading: 'Having trouble with your mental health ',
+      subheading: `Talk to our Personal AI Therapist`,
+      message: `I need help with depression ?`
     }
   ]
 

@@ -8,7 +8,7 @@ import { useActions, useUIState } from 'ai/rsc'
 import { UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { IconArrowElbow, IconPlus, IconUpload } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
@@ -39,6 +39,7 @@ export function PromptForm({
 
   return (
     <form
+      
       ref={formRef}
       onSubmit={async (e: any) => {
         e.preventDefault()
@@ -88,15 +89,16 @@ export function PromptForm({
           tabIndex={0}
           onKeyDown={onKeyDown}
           placeholder="Send a message."
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm rounded-lg"
           autoFocus
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
           name="message"
-          rows={1}
+          rows={3}
           value={input}
           onChange={e => setInput(e.target.value)}
+          style={{borderRadius:50}}
         />
         <div className="absolute right-0 top-[13px] sm:right-4">
           <Tooltip>
@@ -108,6 +110,18 @@ export function PromptForm({
             </TooltipTrigger>
             <TooltipContent>Send message</TooltipContent>
           </Tooltip>
+        </div>
+        <div className="absolute right top-[13px] left-[512px] sm:right-4">
+          <Tooltip>
+            <TooltipTrigger asChild> 
+              <Button type="submit" size="icon" disabled={input === ''}>
+                <IconUpload />
+                <span className="sr-only">Upload file</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Upload file</TooltipContent>
+          </Tooltip>
+          
         </div>
       </div>
     </form>
