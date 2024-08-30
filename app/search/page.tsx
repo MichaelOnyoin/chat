@@ -4,12 +4,9 @@ import cheerio from 'cheerio';
 import { useActions, useUIState } from 'ai/rsc'
 import { useState } from 'react';
 import type { AI } from '@/lib/chat/actions'
-import { Button } from '../ui/button';
-import { Card } from '../ui/card';
+import { Button } from '@/components/ui/button';
 
 export function SearchInternet(query: any){
-    const [, setMessages] = useUIState<typeof AI>()
-    const { submitUserMessage } = useActions()
     const[search,setSearch]= useState<any>(null);
     const [query1, setQuery] = useState<string>('');
     const [loading, setLoading] = useState(false);
@@ -22,12 +19,8 @@ export function SearchInternet(query: any){
         if (response.status === 200) {
             const $ = cheerio.load(response.data);
             // Extract the information you need from the website
-            // For example, find and print the first search 
-            //
-            const searchResults = $(`h3.search-result-title`);
-           // setSearch(searchResults.text());
-            //const searchResults = $;
-
+            // For example, find and print the first search result
+            const searchResults = $('h3.search-result-title');
             if (searchResults.length > 0) {
                 const firstResult = searchResults.first().text();
                 console.log(firstResult);
@@ -66,17 +59,11 @@ export function SearchInternet(query: any){
       </p>
       <div>
       <p>
-        <h3>Here are the results:  <Card>{search}</Card></h3>
+        <h1>Here are the results{search}</h1>
         {search}
-        <br>
-         
-        </br>
+
       </p>
       </div>
     </div>
    )
 }
-
-
-// Example usage
-

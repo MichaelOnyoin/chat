@@ -74,7 +74,7 @@ export function Weather(){
           <div className="flex items-center space-x-4 rounded-md border p-4">
             <div className='flex-1 space-y-1 grid-cols-3'>
                 <img src="/weather-icon.png" alt="Weather Icon" className="w-21 h-21" />
-                <p className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0 grid-cols-1 font-semibold" >Temperature: {weather.main.temp} °C</p>
+                <p className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0 font-semibold" >Temperature: {weather.main.temp} °C</p>
                 <p className="text-xl font-semibold">Condition: {weather.weather[0].description}</p>
                 <p className="text-gray-500">Feels like : {weather.main.feels_like}°C</p>
             </div>

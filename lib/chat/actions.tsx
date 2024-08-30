@@ -148,14 +148,14 @@ async function submitUserMessage(content: string) {
     - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     
-    If the user requests weather, first ask for user's city then call \`get_city_weather\` to show the weather UI.
+    If the user requests about the weather, tell him he will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
+    If a user wants the most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` if that fails say sorry.
     If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
 
-    
     Besides that, you can also chat with users and do some calculations if needed.`,
     messages: [
       ...aiState.get().messages.map((message: any) => ({
@@ -241,9 +241,9 @@ async function submitUserMessage(content: string) {
         }
       },
       search_the_internet: {
-        description: 'Search the internet',
+        description: 'Search the internet to get most recent(2024) or real-time information',
         parameters: z.object({ 
-               query: z.string().describe('the query')
+               query: z.string().describe('the question or query to search on the internet')
                }).required(),
         generate: async function* ({query }) {
           yield (
@@ -295,25 +295,7 @@ async function submitUserMessage(content: string) {
          
         }
       },
-      // search_The_Internet: {
-      //   description: 'Search the internet',
-      //   parameters: z.object({ 
-      //     query: z.string().describe('the query')
-      //     }).required(),
-      //     generate: async function* ({ query }) 
-      //     { yield(
-      //       <BotCard>
-      //         <SearchInternet query={query} />
-      //       </BotCard>
-      //     )
-      //       const toolCallId = nanoid()
-      //       aiState.done({
-      //         ...aiState.get(),
-      //         messages: [
-      //           ...aiState.get().messages,
-                
-      //           {
-
+      
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
         parameters: z.object({

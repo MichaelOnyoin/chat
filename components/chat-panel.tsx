@@ -41,9 +41,9 @@ export function ChatPanel({
       message: `What are the trending memecoins today?`
     },
     {
-      heading: 'What is the price of',
-      subheading: '$DOGE right now?',
-      message: 'What is the price of $DOGE right now?'
+      heading: 'Whats the weather like today',
+      subheading: 'In my city',
+      message: 'Whats the weather like today right now, in my city ?'
     },
     {
       heading: 'I would like to buy',
@@ -53,7 +53,7 @@ export function ChatPanel({
     {
       heading: 'Having trouble with your mental health ',
       subheading: `Talk to our Personal AI Therapist`,
-      message: `I need help with depression ?`
+      message: `Having trouble with your mental health,talk to our Personal AI Therapist ?`
     }
   ]
 
