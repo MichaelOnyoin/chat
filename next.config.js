@@ -7,7 +7,9 @@ module.exports = {
         hostname: 'avatars.githubusercontent.com',
         port: '',
         pathname: '**'
-      }
+      },
+      
     ]
+   
   }
 }

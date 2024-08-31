@@ -148,7 +148,7 @@ async function submitUserMessage(content: string) {
     - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     
-    If the user requests about the weather, tell him he will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
+    If the user requests about the weather tell the user will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
