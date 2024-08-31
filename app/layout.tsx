@@ -7,6 +7,7 @@ import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Providers } from '@/components/providers'
 import { Header } from '@/components/header'
 import { Toaster } from '@/components/ui/sonner'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata = {
   metadataBase: process.env.VERCEL_URL
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
+          <SpeedInsights />
           <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
