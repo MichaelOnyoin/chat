@@ -28,7 +28,7 @@ import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { Weather } from '@/components/stocks/weather'
-import { SearchInternet } from '@/components/stocks/internet'
+
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -240,61 +240,61 @@ async function submitUserMessage(content: string) {
           return (<BotCard><Weather/></BotCard>)
         }
       },
-      search_the_internet: {
-        description: 'Search the internet to get most recent(2024) or real-time information',
-        parameters: z.object({ 
-               query: z.string().describe('the question or query to search on the internet')
-               }).required(),
-        generate: async function* ({query }) {
-          yield (
-            <BotCard>   
-              <SpinnerMessage />
-            </BotCard>
-          )
+      // search_the_internet: {
+      //   description: 'Search the internet to get most recent(2024) or real-time information',
+      //   parameters: z.object({ 
+      //          query: z.string().describe('the question or query to search on the internet')
+      //          }).required(),
+      //   generate: async function* ({query }) {
+      //     yield (
+      //       <BotCard>   
+      //         <SpinnerMessage />
+      //       </BotCard>
+      //     )
 
-          await sleep(1000)
+      //     await sleep(1000)
 
-          const toolCallId = nanoid()
+      //     const toolCallId = nanoid()
 
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-              {
-                id: nanoid(),
-                role: 'assistant',
-                content: [
-                  {
-                    type: 'tool-call',
-                    toolName: 'search_the_internet',
-                    toolCallId,
-                    args: { query }
-                  }
-                ]
-              },
-              {
-                id: nanoid(),
-                role: 'tool',
-                content: [
-                  {
-                    type: 'tool-result',
-                    toolName: 'search_the_internet',
-                    toolCallId,
-                    result: query
-                  }
-                ]
-              }
-            ]
-          })
-          return(
-            <BotCard >
-              <SearchInternet query={query}/>
-            </BotCard>
-          )
+      //     aiState.done({
+      //       ...aiState.get(),
+      //       messages: [
+      //         ...aiState.get().messages,
+      //         {
+      //           id: nanoid(),
+      //           role: 'assistant',
+      //           content: [
+      //             {
+      //               type: 'tool-call',
+      //               toolName: 'search_the_internet',
+      //               toolCallId,
+      //               args: { query }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           id: nanoid(),
+      //           role: 'tool',
+      //           content: [
+      //             {
+      //               type: 'tool-result',
+      //               toolName: 'search_the_internet',
+      //               toolCallId,
+      //               result: query
+      //             }
+      //           ]
+      //         }
+      //       ]
+      //     })
+      //     return(
+      //       <BotCard >
+      //         <SearchInternet query={query}/>
+      //       </BotCard>
+      //     )
 
          
-        }
-      },
+      //   }
+      // },
       
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
