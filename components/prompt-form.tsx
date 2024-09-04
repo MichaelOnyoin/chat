@@ -122,15 +122,15 @@ export function PromptForm({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-            {/* <div className='flex flex-col mb-6'>
+            <div className='flex flex-col mb-6'>
             <label className='mb-2 text-sm font-medium'>Upload Image</label>
             <input
               type='image'
               className="text-sm border rounded-lg cursor-pointer"
               onChange={(e) => handleFileChange(e)}
             />
-            </div> */}
-            <ImageUpload/>
+            </div>
+            {/* <ImageUpload/> */}
             </TooltipContent>
           </Tooltip>
           
