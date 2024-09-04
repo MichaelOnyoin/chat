@@ -2,7 +2,6 @@
 
 import { Message, useAssistant } from "ai/react";
 import { useEffect, useRef } from "react";
-//import getFile from "@/app/assistant/api/route"
 
 const roleToColorMap: Record<Message["role"], string> = {
     system: "red",

@@ -4,7 +4,7 @@ import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 
 import { useActions, useUIState } from 'ai/rsc'
-
+import { ChangeEvent, useState, FormEvent } from "react"
 import { UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
+import  ImageUpload  from './image'
 
 export function PromptForm({
   input,
@@ -116,14 +117,51 @@ export function PromptForm({
             <TooltipTrigger asChild> 
               <Button type="submit" size="icon" disabled={input === ''}>
                 <IconUpload />
-                <span className="sr-only">Upload file</span>
+                
+                <span className="sr-only"> Upload file</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Upload file</TooltipContent>
+            <TooltipContent>
+            {/* <div className='flex flex-col mb-6'>
+            <label className='mb-2 text-sm font-medium'>Upload Image</label>
+            <input
+              type='image'
+              className="text-sm border rounded-lg cursor-pointer"
+              onChange={(e) => handleFileChange(e)}
+            />
+            </div> */}
+            <ImageUpload/>
+            </TooltipContent>
           </Tooltip>
           
         </div>
       </div>
     </form>
   )
+}
+
+function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+  if(event.target.files === null) {
+    window.alert("No file selected. Choose a file.")
+    return;
+  }
+  const file = event.target.files[0];
+
+  // Convert the users file (locally on their computer) to a base64 string
+  // FileReader
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+
+  reader.onload = () => {
+    // reader.result -> base64 string ("ENTIRESTRING" -> :))
+    if(typeof reader.result === "string") {
+      console.log(reader.result);
+      //set(reader.result);
+    }
+  }
+
+  reader.onerror = (error) => {
+    console.log("error: " + error);
+  }
+
 }
