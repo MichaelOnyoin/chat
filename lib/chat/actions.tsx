@@ -29,6 +29,8 @@ import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { Weather } from '@/components/stocks/weather'
 import { SearchBrave } from '@/components/stocks/search'
+import { Scrapper } from '@/components/stocks/scrapper'
+import { Internet } from '@/components/stocks/internet'
 
 import {
   formatNumber,
@@ -112,15 +114,6 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
   }
 }
 
-// async function Upload() {
-//   const file = await openai.files.create({
-//     file: fs.createReadStream("mydata.jsonl"),
-//     purpose: "fine-tune",
-//   });
-
-//   console.log(file);
-// }
-
 
 async function submitUserMessage(content: string) {
   'use server'
@@ -159,12 +152,14 @@ async function submitUserMessage(content: string) {
     - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     
+    
     If the user requests about the weather tell the user will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
     If a user wants the most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` if that fails say sorry.
+    If the user wants to scrap a certain website tell the user to provide the website's url then, call \`scrapper\`
     If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
 
     Besides that, you can also chat with users and do some calculations if needed.`,
@@ -300,7 +295,64 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-               <SearchBrave query={query}/>
+               <Internet />
+              </BotCard>
+            
+          )
+
+         
+        }
+      },
+      scrapper: {
+        description: 'Web Scrap any information you want from the internet',
+        parameters: z.object({ 
+               url: z.string().describe('Enter the website you want to scrap')
+               }).required(),
+        generate: async function* ({url }) {
+          yield (
+            <BotCard>   
+              <SpinnerMessage />
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'scrapper',
+                    toolCallId,
+                    args: { url }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'scrapper',
+                    toolCallId,
+                    result: url
+                  }
+                ]
+              }
+            ]
+          })
+          return(
+      
+              <BotCard>
+               <Scrapper/>
               </BotCard>
             
           )

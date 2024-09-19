@@ -1,8 +1,7 @@
-//import axios from 'axios'
-'use client'
 import axios, { AxiosResponse } from 'axios';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+//import { useState } from 'react';
+
 
 interface SearchResult { 
     title: string; 
@@ -10,20 +9,30 @@ interface SearchResult {
     snippet: string; 
 }
 
-export function SearchBrave(query: any){
-     const url = 'https://www.google.com/';
+export function SearchBrave(){
+    
      const API_KEY='BSAXH1w-j_FK7P6zu8rJ9jFtfEUbZrG';
-     const [query1, setQuery] = useState<string>('');
-     const[int, setInt]= useState<any>('');
+     //const [query1, setQuery] = useState<string>('');
+     //const[int]= [''];
+     const query1 ='Arcane'
+     const url = `https://api.search.brave.com/res/v1/web/search `;
+     //const int=[''];
      
     const Search = async ()=>{
      try { 
         // Make the request to the Brave Search API 
+        //const response = await axios(`https://api.search.brave.com/res/v1/web/search?q=${query1} \ -H '"X-Subscription-Token:BSAXH1w-j_FK7P6zu8rJ9jFtfEUbZrG'`)
         const response: AxiosResponse<any> = await axios.get(url, 
             { 
-                params: { q: query1, count:5, offset:0 },// The search query count: 10, // Number of results to retrieve offset: 0, // Offset for pagination 
+                params: { q: query1, count:5, },// The search query count: 10, // Number of results to retrieve offset: 0, // Offset for pagination 
             
-                headers: { Authorization: API_KEY}
+                headers: { 
+                     'X-Subscription-Token': API_KEY,
+                     'Accept':'*/*',
+                     'Accept-Encoding': 'gzip',
+
+                },
+
             }
              // Add the API key for authorization 
             
@@ -31,15 +40,16 @@ export function SearchBrave(query: any){
         );
         // Extract and format the search results
              
-            const results = response.data.webpages.value || [];
+            const results = response.data.web.results || [];
             const Internet= results.map((result: any) => ({
             title: result.name,
             link: result.url,
             snippet: result.snippet,
             }));
 
-            setInt(Internet);
-            console.log('Search Results:', results);
+            //setInt(Internet);
+         console.log('Search Results:', results);
+
       }
         catch (error) 
         { console.error('Error fetching search results:', error); return []; } 
@@ -50,7 +60,7 @@ export function SearchBrave(query: any){
     <div>
         <h1>Search Results</h1>
         
-        <input 
+        {/* <input 
           className='min-h-[60px] w-[430px] resize-none bg-transparent px-3 py-[1.3rem] sm:text-sm rounded-lg'
           type="text" id="search" 
           value={query1}
@@ -62,16 +72,13 @@ export function SearchBrave(query: any){
             //.then((results) => { console.log('Search Results:', results); }).catch((error) => { console.error('Search Error:', error); 
 
             // }) }
-        >Search</Button>
+        >Search</Button> */}
         
-        <script async src="https://cse.google.com/cse.js?cx=809bf1261a7df4589">
-            
-            <div className="gcse-search">input</div>
-        </script>
+        
         <div>
-            <h2>Search Results</h2>
+            {/* <h2>Search Results</h2> */}
             <p>
-               {int && (
+               {/* {int && (
                 int.map((item: any) => (
                     <div key={item.title}>
                         <h2>{item.title}</h2>
@@ -79,16 +86,17 @@ export function SearchBrave(query: any){
                          <p>{item.snippet}</p>
                     </div>
 
-               )))}
+               )))} */}
+
             </p>
 
         </div>
-        <p>{int}
-           {}
-        </p>
+        
         
     </div>
  )
  }
+
+ export default SearchBrave;
 
  

@@ -1,13 +1,15 @@
 'use client'
 import { useState } from 'react';
 import axios from 'axios';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card"
 import { Button } from '@/components/ui/button';
+import { SunIcon,BlendingModeIcon } from "@radix-ui/react-icons";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWind,faThermometerHalf } from "@fortawesome/free-solid-svg-icons";
+
 
 export function Weather(){
   
@@ -53,41 +55,66 @@ export function Weather(){
         
        {loading && <p>Loading...</p>}
        {error && <p>Error: {error}</p>}
-       {weather && ( 
+       {weather&&(
+
+       
+<div className="bg-white rounded-lg shadow-lg p-6 w-209 content-center">
+    <div className="text-center text-xl font-bold text-gray-800 mb-4">{weather.name} Weather Forecast</div>
+    <div className="flex justify-between items-center mb-4">
+        <div className="text-lg font-bold text-gray-700">{new Date().toLocaleString() + ''}</div>
+        <input type="text"  
+        value={city1}
+        placeholder="city name"
+        className="border border-orange-400 rounded-full px-3 py-1 text-gray-700 focus:outline-none" />
         
-    <Card className="w-[580px] justify-content">
-      <div>
-      <CardHeader>
-        <CardTitle>
-        <h2 className="text-lg font-bold" >Weather in {weather.name}</h2>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-500">   
-                Date: {new Date().toLocaleString() + ''}
-        </p>
-
-
-      </CardContent>
-      <CardContent className="grid gap-4">
-          <div className="flex items-center space-x-4 rounded-md border p-4">
-            <div className='flex-1 space-y-1 grid-cols-3'>
-              
-                <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} alt="Weather Icon" className="w-21 h-21" />
-                <p className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0 font-semibold" >Temperature: {weather.main.temp} °C</p>
-                <p className="text-xl font-semibold">Condition: {weather.weather[0].description}</p>
-                <p className="text-gray-500">Feels like : {weather.main.feels_like}°C</p>
+    </div>
+    <div className="flex">
+        <div className="flex-1 flex flex-col items-center justify-center border-r border-gray-200">
+            <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} alt="Weather icon" className="mb-2" />
+            <div className="text-4xl font-bold text-gray-800">{weather.main.temp}°C</div>
+            <div className="text-gray-600">{weather.weather[0].description}</div>
+        </div>
+        <div className="flex-1 grid grid-cols-2 gap-4 p-4">
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Feels Like</div>
+                <div className="text-xl font-bold text-gray-800">{weather.main.feels_like}°C</div>
+                <FontAwesomeIcon icon={faThermometerHalf} className="fas fa-thermometer-half " style={{ color: "orange" }}></FontAwesomeIcon>
+                
             </div>
-            <div>
-                <p className="text-gray-500 font-medium">Humidity : {weather.main.humidity}%</p>
-                <p className="text-gray-500 font-medium">Pressure : {weather.main.pressure}</p>
-                <p className="text-gray-500 font-medium">Wind Speed : {weather.wind.speed}m/s</p>
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Wind</div>
+                <div className="text-xl font-bold text-gray-800">{weather.wind.speed} m/s</div>
+                
+                <FontAwesomeIcon icon={faWind} className="fas fa-wind" style={{ color: "grey" }}>
+
+                </FontAwesomeIcon>
             </div>
-          </div>
-          </CardContent>
-      </div>
-    </Card>
-    )}
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Humidity</div>
+                <div className="text-xl font-bold text-gray-800">{weather.main.humidity}%</div>
+               
+                <BlendingModeIcon className="text-blue-500"></BlendingModeIcon>
+            </div>
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Pressure</div>
+                <div className="text-xl font-bold text-gray-800">{weather.main.pressure} mm</div>
+                
+            </div>
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Country</div>
+                <div className="text-xl font-bold text-gray-800">{weather.sys.country}</div>
+                
+            </div>
+            <div className="flex flex-col items-center">
+                <div className="text-gray-600">Sunset</div>
+                <div className="text-xl font-bold text-gray-800">6:26 PM</div>
+                
+                <SunIcon className="text-orange-500"></SunIcon>
+            </div>
+        </div>
+    </div>
+</div>
+)}
     </div>
 
 
