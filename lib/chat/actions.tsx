@@ -28,10 +28,10 @@ import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { Weather } from '@/components/stocks/weather'
-import { SearchBrave } from '@/components/stocks/search'
-import { Scrapper } from '@/components/stocks/scrapper'
-import { Internet } from '@/components/stocks/internet'
 
+import { Scrapper } from '@/components/stocks/scrapper'
+
+import axios from 'axios';
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -158,7 +158,7 @@ async function submitUserMessage(content: string) {
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
-    If a user wants the most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` if that fails say sorry.
+    If a user asks for something that requires most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` then summarize the results you got.
     If the user wants to scrap a certain website tell the user to provide the website's url then, call \`scrapper\`
     If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
 
@@ -252,6 +252,19 @@ async function submitUserMessage(content: string) {
                query: z.string().describe('the question or query to search on the internet')
                }).required(),
         generate: async function* ({query }) {
+          const response= await axios.get('https://api.search.brave.com/res/v1/web/search', {
+            headers: {
+              'Accept': '*/*',
+              'Accept-Encoding': 'gzip',
+              'X-Subscription-Token': 'BSAXH1w-j_FK7P6zu8rJ9jFtfEUbZrG'
+            },
+            params: {
+                q: query,
+                count: 5  ,
+                extra_snippets: true
+                }
+          });
+          const result1 = await response.data.web.results[0];
           yield (
             <BotCard>   
               <SpinnerMessage />
@@ -286,7 +299,7 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'search_the_internet',
                     toolCallId,
-                    result: query
+                    result: result1
                   }
                 ]
               }
@@ -295,9 +308,15 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-               <Internet />
+                <div>
+                    <h1>Search: {result1.title}</h1>
+                    <p>Results: {result1.description}</p>
+                    <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
+                    <p>Snippet: {result1.extra_snippets}</p>
+                </div>
+               
               </BotCard>
-            
+              
           )
 
          

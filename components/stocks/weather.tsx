@@ -61,7 +61,7 @@ export function Weather(){
 <div className="bg-white rounded-lg shadow-lg p-6 w-209 content-center">
     <div className="text-center text-xl font-bold text-gray-800 mb-4">{weather.name} Weather Forecast</div>
     <div className="flex justify-between items-center mb-4">
-        <div className="text-lg font-bold text-gray-700">{new Date().toLocaleString() + ''}</div>
+        <div className="text-lg font-bold text-gray-700">Date: {new Date().toLocaleString() + ''}</div>
         <input type="text"  
         value={city1}
         placeholder="city name"
@@ -107,7 +107,12 @@ export function Weather(){
             </div>
             <div className="flex flex-col items-center">
                 <div className="text-gray-600">Sunset</div>
-                <div className="text-xl font-bold text-gray-800">6:26 PM</div>
+                <div className="text-xl font-bold text-gray-800">
+                  {new Date((weather.sys.sunset+weather.timezone)*1000).toISOString().substring(11,16)}pm
+                  {/* 
+                  {new Date((weather.sys.sunrise+weather.timezone)*1000).toISOString().substring(11,16)}
+                  {new Date()} */}
+                  </div>
                 
                 <SunIcon className="text-orange-500"></SunIcon>
             </div>
