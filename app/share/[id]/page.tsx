@@ -1,5 +1,5 @@
 import { type Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
 import { formatDate } from '@/lib/utils'
 import { getSharedChat } from '@/app/actions'

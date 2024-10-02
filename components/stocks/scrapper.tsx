@@ -72,7 +72,7 @@ const config= {
   headers: {}
 };
 try{
-    const ponse = await axios(config);
+    
 await axios(config)
   .then((response) => {
     console.log(response.data);

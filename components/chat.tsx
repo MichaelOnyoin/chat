@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
+import { Menu } from '@/components/model-menu'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
 import { useUIState, useAIState } from 'ai/rsc'
@@ -72,6 +73,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         )}
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
+      
       <ChatPanel
         id={id}
         input={input}

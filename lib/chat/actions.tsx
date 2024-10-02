@@ -10,7 +10,7 @@ import {
   
 } from 'ai/rsc'
 import { openai } from '@ai-sdk/openai'
-
+import { tool } from 'ai'
 import {
   spinner,
   BotCard,
@@ -42,6 +42,10 @@ import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
+
+// import { findRelevantContent } from '@/lib/chat/embeddings';
+// import { createResource } from '@/public/db/resources';
+
 
 
 async function confirmPurchase(symbol: string, price: number, amount: number) {
@@ -135,8 +139,13 @@ async function submitUserMessage(content: string) {
   let textStream: undefined | ReturnType<typeof createStreamableValue<string>>
   let textNode: undefined | React.ReactNode
 
+  const availableModels = [
+    { name: 'GPT-3.5 Turbo', model: 'gpt-3.5-turbo' },
+    { name: 'GPT-4o-Mini', model: 'gpt-4o-mini' },
+  ];
+
   const result = await streamUI({
-    model: openai('gpt-3.5-turbo'),
+    model: openai(availableModels[1].model),
     initial: <SpinnerMessage />,
     system: `\
     You are an AI assistant that helps users find information
@@ -160,6 +169,8 @@ async function submitUserMessage(content: string) {
     If you want to show events, call \`get_events\`.
     If a user asks for something that requires most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` then summarize the results you got.
     If the user wants to scrap a certain website tell the user to provide the website's url then, call \`scrapper\`
+    If the user asks about himself, then call \`getDatabase\` , if the information is not available tell the user to add it.
+    If user tells you about himself, then call \`addResource\` ,then say you have stored that information about him.
     If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
 
     Besides that, you can also chat with users and do some calculations if needed.`,
@@ -328,6 +339,20 @@ async function submitUserMessage(content: string) {
                url: z.string().describe('Enter the website you want to scrap')
                }).required(),
         generate: async function* ({url }) {
+          const token: string = "e34de50f61cf4cccb4d855509e3aadb7edb6cdc8041";
+          const targetUrl: string = encodeURIComponent(url);
+          const render: string = "true";
+          const returnJson = "true";
+
+          const config= {
+            method: 'GET',
+            url: `https://api.scrape.do?token=${token}&url=${targetUrl}&render=${render}`,
+            headers: {}
+          };
+          
+          const response = await axios(config);
+          
+          const scrap = await response.data;
           yield (
             <BotCard>   
               <SpinnerMessage />
@@ -362,7 +387,7 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'scrapper',
                     toolCallId,
-                    result: url
+                    result: scrap
                   }
                 ]
               }
@@ -371,7 +396,7 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-               <Scrapper/>
+               {scrap}
               </BotCard>
             
           )
@@ -379,6 +404,86 @@ async function submitUserMessage(content: string) {
          
         }
       },
+      // getDatabase :{
+      //   description: 'get information about the user from the database to answer personalized questions in otherwards questions about the user.',
+      //   parameters: z.object({ 
+      //          question: z.string().describe('the users question')
+      //          }).required(),
+      //   generate: async function* ({question }) {
+          
+      //      const response3 = findRelevantContent(question);
+           
+      //      const stream = (await response3);
+           
+      //     yield (
+      //       <BotCard>   
+      //         <SpinnerMessage />
+      //       </BotCard>
+      //     )
+
+      //     await sleep(1000)
+
+      //     const toolCallId = nanoid()
+          
+      //     aiState.done({
+      //       ...aiState.get(),
+      //       messages: [
+      //         ...aiState.get().messages,
+      //         {
+      //           id: nanoid(),
+      //           role: 'assistant',
+      //           content: [
+      //             {
+      //               type: 'tool-call',
+      //               toolName: 'getDatabase',
+      //               toolCallId,
+      //               args: { question }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           id: nanoid(),
+      //           role: 'tool',
+      //           content: [
+      //             {
+      //               type: 'tool-result',
+      //               toolName: 'getDatabase',
+      //               toolCallId,
+      //               result: stream
+      //             }
+      //           ]
+      //         }
+      //       ]
+      //     })
+       
+
+      //     return(
+      //      <BotCard>
+      //         <div>
+                
+      //         {stream[0].name}
+      //         </div>
+      //      </BotCard>
+      //     )
+
+         
+      //   }
+      // },
+
+
+      // addResource: tool({
+      //   description: `add a resource to your knowledge base.
+      //     If the user provides a random piece of knowledge unprompted, use this tool without asking for confirmation.`,
+      //   parameters: z.object({
+      //     content: z
+      //       .string()
+      //       .describe('the content or resource to add to the knowledge base'),
+      //   }),
+      //   execute: async ({ content }) => createResource({ content }),
+
+      // }),
+      
+      
       
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
@@ -401,6 +506,33 @@ async function submitUserMessage(content: string) {
           await sleep(1000)
 
           const toolCallId = nanoid()
+          // if(result){
+          //   aiState.done({
+          //     ...aiState.get(),
+          //     messages: [
+          //       ...aiState.get().messages,
+          //       {
+          //         id: nanoid(),
+          //         role: 'assistant',
+          //         content: 'Resource added successfully!',
+          //       },
+          //     ],
+          //   });
+          // }else {
+          //   // ... handle the error case
+          //   aiState.done({
+          //     ...aiState.get(),
+          //     messages: [
+          //       ...aiState.get().messages,
+          //       {
+          //         id: nanoid(),
+          //         role: 'assistant',
+          //         content: 'Error adding resource: ' +result
+          //         ,
+          //       },
+          //     ],
+          //   });
+          // }
 
           aiState.done({
             ...aiState.get(),
