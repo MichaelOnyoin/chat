@@ -1,5 +1,10 @@
 "use client"
 import { ChangeEvent, useState, FormEvent } from "react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 
 export default function Image() {
@@ -127,7 +132,11 @@ export default function Image() {
         :
         null
         }
-        
+        <Popover>
+          <PopoverTrigger>Open</PopoverTrigger>
+          <PopoverContent>Place content for the popover here.</PopoverContent>
+        </Popover>
+
 
       </div>
     </div>

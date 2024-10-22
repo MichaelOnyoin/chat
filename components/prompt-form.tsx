@@ -8,7 +8,7 @@ import { ChangeEvent, useState, FormEvent } from "react"
 import { UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconPlus, IconUpload } from '@/components/ui/icons'
+import { IconArrowElbow, IconPlus, IconUpload, IconPaperPlane } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
@@ -17,8 +17,14 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
-import  ImageUpload  from './image'
-
+import FileUpload from '@/components/image'
+import { ImageDialog } from './image-dialog'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+ 
 export function PromptForm({
   input,
   setInput
@@ -31,6 +37,7 @@ export function PromptForm({
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const { submitUserMessage } = useActions()
   const [_, setMessages] = useUIState<typeof AI>()
+
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -101,67 +108,47 @@ export function PromptForm({
           onChange={e => setInput(e.target.value)}
           style={{borderRadius:50}}
         />
-        <div className="absolute right-0 top-[13px] sm:right-4">
-          <Tooltip>
+        <div className="absolute right-0 top-[13px] sm:right-4 ">
+        <Tooltip>
             <TooltipTrigger asChild>
               <Button type="submit" size="icon" disabled={input === ''}>
-                <IconArrowElbow />
+                {/* <IconArrowElbow /> */}
+                <IconPaperPlane/>
                 <span className="sr-only">Send message</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>Send message</TooltipContent>
           </Tooltip>
         </div>
-        <div className="absolute right top-[13px] left-[512px] sm:right-4">
+        {/* <div>
           <Tooltip>
             <TooltipTrigger asChild> 
-              <Button type="submit" size="icon" disabled={input === ''}>
+              <Popover>
+                <PopoverTrigger>
+              <Button type="button" size="icon" disabled={input === ''}>
                 <IconUpload />
-                
-                <span className="sr-only"> Upload file</span>
+                <span className="sr-only"> 
+                  Upload file
+                </span>               
               </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                <FileUpload />
+                </PopoverContent>
+              </Popover>
             </TooltipTrigger>
             <TooltipContent>
-            <div className='flex flex-col mb-6'>
-            <label className='mb-2 text-sm font-medium'>Upload Image</label>
-            <input
-              type='image'
-              className="text-sm border rounded-lg cursor-pointer"
-              onChange={(e) => handleFileChange(e)}
-            />
-            </div>
-            {/* <ImageUpload/> */}
+              Upload File
             </TooltipContent>
+           
           </Tooltip>
-          
-        </div>
+        </div>   */}
+        
       </div>
     </form>
   )
 }
 
-function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-  if(event.target.files === null) {
-    window.alert("No file selected. Choose a file.")
-    return;
-  }
-  const file = event.target.files[0];
 
-  // Convert the users file (locally on their computer) to a base64 string
-  // FileReader
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
 
-  reader.onload = () => {
-    // reader.result -> base64 string ("ENTIRESTRING" -> :))
-    if(typeof reader.result === "string") {
-      console.log(reader.result);
-      //set(reader.result);
-    }
-  }
 
-  reader.onerror = (error) => {
-    console.log("error: " + error);
-  }
-
-}

@@ -385,3 +385,154 @@ Weather Function
     </script>
 </body>
 </html>
+
+
+
+import { addResource } from '@/public/db/resources';
+async function storeScrapedData(data) {
+  // Store the scraped data into a database or in-memory state
+  await addResource(data);
+  console.log('Scraped data stored successfully');
+}
+
+function parseScrapedData(rawData) {
+  // Parse the raw data into a more structured format (e.g., an object with title, headings, paragraphs)
+  const parsedData = {
+    title: rawData.title || 'Untitled',
+    headings: rawData.headings || [],
+    content: rawData.paragraphs || [],
+    url: rawData.url || '',
+  };
+  return parsedData;
+}
+
+async function answerQuestionAboutWebsite(question, websiteData) {
+  // Simple logic to search for the answer in the website data
+  const { title, headings, content } = websiteData;
+
+  // Check if the question relates to any title or headings
+  let answer = '';
+  if (title.toLowerCase().includes(question.toLowerCase())) {
+    answer = `The website's title is: ${title}`;
+  } else {
+    // Search through headings and content to find a relevant answer
+    answer = headings.find((heading) => heading.toLowerCase().includes(question.toLowerCase())) ||
+             content.find((paragraph) => paragraph.toLowerCase().includes(question.toLowerCase())) ||
+             'I could not find a specific answer. Try rephrasing your question.';
+  }
+  
+  return answer;
+}
+
+const parsedData = parseScrapedData(scrapedData.data);
+    await storeScrapedData(parsedData);
+
+<SpinnerMessage />
+        <p>Scraping website data...</p>
+
+scrapper: {
+  description: 'Scrapes a website and processes the data to be queried by the AI',
+  parameters: z.object({ 
+    url: z.string().describe('the website URL to scrape')
+  }).required(),
+  generate: async function* ({ url }) {
+    // Step 1: Call the scraper API
+    const scrapedData = await axios.get(`https://your-scraper-api.com/scrape?url=${url}`);
+    
+    // Step 2: Parse and store the scraped data
+    const parsedData = parseScrapedData(scrapedData.data);
+    await storeScrapedData(parsedData);
+    
+    yield (
+      <BotCard>
+        <SpinnerMessage />
+        <p>Scraping website data...</p>
+      </BotCard>
+    );
+    
+    await sleep(1000);
+    
+    // Step 3: Indicate that the scraped data is now ready for questions
+    return (
+      <BotCard>
+        <p>The data from the website has been processed and stored. You can now ask questions about it!</p>
+      </BotCard>
+    );
+  }
+}
+
+
+pip install requests beautifulsoup4
+
+import requests
+from bs4 import BeautifulSoup
+
+def scrape_website(url):
+    # Send a GET request to the website
+    response = requests.get(url)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the HTML content
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Get the title of the webpage
+        title = soup.title.string
+        print(f"Title of the webpage: {title}")
+
+        # Find all links on the webpage
+        links = soup.find_all('a')
+
+        print("Links found on the webpage:")
+        for link in links:
+            href = link.get('href')
+            if href:
+                print(href)
+    else:
+        print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+
+if __name__ == "__main__":
+    url = input("Enter the URL of the website to scrape: ")
+    scrape_website(url)
+
+
+npm install axios cheerio
+npm install typescript @types/node --save-dev
+npx tsc --init
+
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+
+async function scrapeWebsite(url: string) {
+    try {
+        // Send a GET request to the website
+        const { data } = await axios.get(url);
+
+        // Load the HTML into cheerio
+        const $ = cheerio.load(data);
+
+        // Get the title of the webpage
+        const title = $('title').text();
+        console.log(`Title of the webpage: ${title}`);
+
+        // Find all links on the webpage
+        const links = $('a');
+
+        console.log('Links found on the webpage:');
+        links.each((index, element) => {
+            const href = $(element).attr('href');
+            if (href) {
+                console.log(href);
+            }
+        });
+    } catch (error) {
+        console.error(`Failed to retrieve the webpage: ${error}`);
+    }
+}
+
+const url = 'https://example.com'; // Replace with the desired URL
+scrapeWebsite(url);
+
+
+npx tsc scraper.ts
+node scraper.js

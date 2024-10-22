@@ -1,5 +1,4 @@
 "use client";
-
 import { Message, useAssistant } from "ai/react";
 import { useEffect, useRef } from "react";
 
@@ -16,7 +15,7 @@ export default function Chat() {
   const { status, messages, input, submitMessage, handleInputChange, error } =
     useAssistant({
       api: "therapist/api/",
-    });
+    }); 
 
   // When status changes to accepting messages, focus the input:
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +59,7 @@ export default function Chat() {
       {status === "in_progress" && (
         <div className="h-8 w-full max-w-md p-2 mb-8 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse" />
       )}
-
+      
       <form onSubmit={submitMessage}>
         <input
           ref={inputRef}

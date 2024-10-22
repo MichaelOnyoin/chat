@@ -21,15 +21,14 @@ import {
   
 } from '@/components/stocks'
 
-import { z } from 'zod'
+import { object, z } from 'zod'
 import { EventsSkeleton } from '@/components/stocks/events-skeleton'
 import { Events } from '@/components/stocks/events'
 import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { Weather } from '@/components/stocks/weather'
-
-import { Scrapper } from '@/components/stocks/scrapper'
+import { createResource } from '@/public/db/resources';
 
 import axios from 'axios';
 import {
@@ -145,7 +144,7 @@ async function submitUserMessage(content: string) {
   ];
 
   const result = await streamUI({
-    model: openai(availableModels[1].model),
+    model: openai(availableModels[0].model),
     initial: <SpinnerMessage />,
     system: `\
     You are an AI assistant that helps users find information
@@ -275,7 +274,7 @@ async function submitUserMessage(content: string) {
                 extra_snippets: true
                 }
           });
-          const result1 = await response.data.web.results[0];
+          const result1 = await response.data.web.results;
           yield (
             <BotCard>   
               <SpinnerMessage />
@@ -285,6 +284,15 @@ async function submitUserMessage(content: string) {
           await sleep(1000)
 
           const toolCallId = nanoid()
+
+          const summarizedResults = result1.map((result1: { title: any; description: any; extra_snippets: any; url: any }, index: number) => {
+            return `
+              ${index + 1}. ${result1.title}
+              Description: ${result1.description}
+              Snippet: ${result1.extra_snippets}
+              Link: ${result1.url}
+            `;
+          }).join('\n\n');
 
           aiState.done({
             ...aiState.get(),
@@ -310,7 +318,8 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'search_the_internet',
                     toolCallId,
-                    result: result1
+                    //result: result1
+                    result: summarizedResults,
                   }
                 ]
               }
@@ -319,12 +328,20 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-                <div>
+                {/* <div>
                     <h1>Search: {result1.title}</h1>
                     <p>Results: {result1.description}</p>
                     <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
                     <p>Snippet: {result1.extra_snippets}</p>
-                </div>
+                </div> */}
+                {result1.map((result1:any, index:any) => (
+                  <div key={index} className="mb-4">
+                    <h2>{index + 1}. {result1.title}</h2>
+                    <p>Description: {result1.description}</p>
+                    <p>Snippet: {result1.extra_snippets}</p>
+                    <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
+                  </div>
+              ))}
                
               </BotCard>
               
@@ -342,20 +359,64 @@ async function submitUserMessage(content: string) {
           const token: string = "e34de50f61cf4cccb4d855509e3aadb7edb6cdc8041";
           const targetUrl: string = encodeURIComponent(url);
           const render: string = "true";
-          const returnJson = "true";
+          const returnJSON = "true";
+          const output = 'markdown'
+          //Scrape.do does support markdown output for LLM data training or other necessary purposes. You can use the output=markdown parameter to obtain the output in markdown format when the response content-type is text/html.
+
+          //&render=${render}  &output=markdown
 
           const config= {
             method: 'GET',
-            url: `https://api.scrape.do?token=${token}&url=${targetUrl}&render=${render}`,
+            url: `https://api.scrape.do?token=${token}&url=${targetUrl}`,
             headers: {}
           };
           
           const response = await axios(config);
           
           const scrap = await response.data;
+
+          // const parsedData = parseScrapedData(scrap.data);
+          // await storeScrapedData(parsedData);
+
+          // async function storeScrapedData(scrap: { content: string }) {
+          //   // Store the scraped data into a database or in-memory state
+          //   await createResource(scrap);
+          //   console.log('Scraped data stored successfully');
+          // }
+          // function parseScrapedData(rawData:any) {
+          //   // Parse the raw data into a more structured format (e.g., an object with title, headings, paragraphs)
+          //   const parsedData = {
+          //     title: rawData.title || 'Untitled',
+          //     headings: rawData.headings || [],
+          //     content: rawData.paragraphs || [],
+          //     url: rawData.url || '',
+          //   };
+          //   return parsedData;
+          // }
+          // async function answerQuestionAboutWebsite(question:any, websiteData:any) {
+          //   // Simple logic to search for the answer in the website data
+          //   const { title, headings, content } = websiteData;
+          
+          //   // Check if the question relates to any title or headings
+          //   let answer = '';
+          //   if (title.toLowerCase().includes(question.toLowerCase())) {
+          //     answer = `The website's title is: ${title}`;
+          //   } else {
+          //     // Search through headings and content to find a relevant answer
+          //     answer = headings.find((heading:any) => heading.toLowerCase().includes(question.toLowerCase())) ||
+          //              content.find((paragraph:any) => paragraph.toLowerCase().includes(question.toLowerCase())) ||
+          //              'I could not find a specific answer. Try rephrasing your question.';
+          //   }
+            
+          //   return answer;
+          // }
+          
+          
           yield (
             <BotCard>   
               <SpinnerMessage />
+              <p>Scraping website data...</p>
+              
             </BotCard>
           )
 
@@ -396,7 +457,13 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-               {scrap}
+                <p>The data from the website has been processed and stored. You can now ask questions about it!</p>
+               
+                <p>{scrap.search('news')}</p>
+                <p>{scrap.name}</p>
+                <p>{scrap}</p>
+
+               {/* {scrap} */}
               </BotCard>
             
           )
@@ -404,71 +471,79 @@ async function submitUserMessage(content: string) {
          
         }
       },
-      // getDatabase :{
-      //   description: 'get information about the user from the database to answer personalized questions in otherwards questions about the user.',
-      //   parameters: z.object({ 
-      //          question: z.string().describe('the users question')
-      //          }).required(),
-      //   generate: async function* ({question }) {
-          
-      //      const response3 = findRelevantContent(question);
+      image :{
+        description: 'get information about the image and describe it, and answer question related to the image',
+        parameters: z.object({ 
+               question: z.string().describe('the image'),
+              // image: z.object().describe('')
+               }).required(),
+        generate: async function* ({question }) {
+          //const { image } = await request.json();
+          //  const response3 = findRelevantContent(question);
+          // const {image}= 'hjf'
+          //  const stream = (await response3);
            
-      //      const stream = (await response3);
-           
-      //     yield (
-      //       <BotCard>   
-      //         <SpinnerMessage />
-      //       </BotCard>
-      //     )
+          yield (
+            <BotCard>   
+              <SpinnerMessage />
+            </BotCard>
+          )
 
-      //     await sleep(1000)
+          await sleep(1000)
 
-      //     const toolCallId = nanoid()
+          const toolCallId = nanoid()
           
-      //     aiState.done({
-      //       ...aiState.get(),
-      //       messages: [
-      //         ...aiState.get().messages,
-      //         {
-      //           id: nanoid(),
-      //           role: 'assistant',
-      //           content: [
-      //             {
-      //               type: 'tool-call',
-      //               toolName: 'getDatabase',
-      //               toolCallId,
-      //               args: { question }
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           id: nanoid(),
-      //           role: 'tool',
-      //           content: [
-      //             {
-      //               type: 'tool-result',
-      //               toolName: 'getDatabase',
-      //               toolCallId,
-      //               result: stream
-      //             }
-      //           ]
-      //         }
-      //       ]
-      //     })
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Whats in this image',
+                    //toolCallId,
+                    //args: { question }
+                  },
+                  {
+                   type: 'image',
+                   //image: image,
+                   image:'https://res.cloudinary.com/dbfydxolq/image/upload/v1724139711/cld-sample-3.jpg',
+                   
+                   }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'image',
+                    toolCallId,
+                    result: question
+                  }
+                ]
+              }
+            ]
+            
+          })
        
 
-      //     return(
-      //      <BotCard>
-      //         <div>
-                
-      //         {stream[0].name}
-      //         </div>
-      //      </BotCard>
-      //     )
+          return(
+           <BotCard>
+              <div>
+              {question}
+              <h1>Hello</h1>
+              </div>
+           </BotCard>
+          )
 
          
-      //   }
-      // },
+        }
+      },
 
 
       // addResource: tool({
