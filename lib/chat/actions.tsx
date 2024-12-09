@@ -10,7 +10,7 @@ import {
   
 } from 'ai/rsc'
 import { openai } from '@ai-sdk/openai'
-import { tool } from 'ai'
+//import { tool } from 'ai'
 import {
   spinner,
   BotCard,
@@ -28,7 +28,7 @@ import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { Weather } from '@/components/stocks/weather'
-import { createResource } from '@/public/db/resources';
+//import { createResource } from '@/public/db/resources';
 
 import axios from 'axios';
 import {
@@ -262,11 +262,12 @@ async function submitUserMessage(content: string) {
                query: z.string().describe('the question or query to search on the internet')
                }).required(),
         generate: async function* ({query }) {
+          const BRAVE= process.env.BRAVE_API;
           const response= await axios.get('https://api.search.brave.com/res/v1/web/search', {
             headers: {
               'Accept': '*/*',
               'Accept-Encoding': 'gzip',
-              'X-Subscription-Token': 'BSAXH1w-j_FK7P6zu8rJ9jFtfEUbZrG'
+              'X-Subscription-Token': `${BRAVE}`
             },
             params: {
                 q: query,
@@ -294,6 +295,26 @@ async function submitUserMessage(content: string) {
             `;
           }).join('\n\n');
 
+           const API = process.env.OPENAI_API_KEY;
+            const openaiResponse = await axios.post('https://api.openai.com/v1/chat/completions', {
+              model: "gpt-3.5-turbo", // You can also use gpt-3.5 or other models
+              //prompt: `Summarize the following search results:\n${summarizedResults}`,
+              messages: [
+                          {"role": "user", "content": `Summarize the following search results:\n${summarizedResults}`}
+                        ],
+              max_tokens: 200
+            }, {
+              headers: {
+                'Authorization': `Bearer ${API}`,
+                'Content-Type': 'application/json'
+              }
+            });
+        
+            // Return the summarized response text
+            const summary= openaiResponse.data.choices[0].message.content;
+
+
+
           aiState.done({
             ...aiState.get(),
             messages: [
@@ -318,7 +339,7 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'search_the_internet',
                     toolCallId,
-                    //result: result1
+                    
                     result: summarizedResults,
                   }
                 ]
@@ -328,20 +349,18 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-                {/* <div>
-                    <h1>Search: {result1.title}</h1>
-                    <p>Results: {result1.description}</p>
-                    <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
-                    <p>Snippet: {result1.extra_snippets}</p>
-                </div> */}
-                {result1.map((result1:any, index:any) => (
+                
+                {/* {result1.map((result1:any, index:any) => (
                   <div key={index} className="mb-4">
                     <h2>{index + 1}. {result1.title}</h2>
                     <p>Description: {result1.description}</p>
                     <p>Snippet: {result1.extra_snippets}</p>
                     <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
                   </div>
-              ))}
+              ))} */}
+              <div>
+                <p>Search: {summary}</p>
+              </div>
                
               </BotCard>
               

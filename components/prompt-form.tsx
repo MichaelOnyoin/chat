@@ -4,7 +4,7 @@ import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 
 import { useActions, useUIState } from 'ai/rsc'
-import { ChangeEvent, useState, FormEvent } from "react"
+//import { ChangeEvent, useState, FormEvent } from "react"
 import { UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
@@ -17,13 +17,7 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
-import FileUpload from '@/components/image'
-import { ImageDialog } from './image-dialog'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+
  
 export function PromptForm({
   input,
@@ -120,29 +114,6 @@ export function PromptForm({
             <TooltipContent>Send message</TooltipContent>
           </Tooltip>
         </div>
-        {/* <div>
-          <Tooltip>
-            <TooltipTrigger asChild> 
-              <Popover>
-                <PopoverTrigger>
-              <Button type="button" size="icon" disabled={input === ''}>
-                <IconUpload />
-                <span className="sr-only"> 
-                  Upload file
-                </span>               
-              </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                <FileUpload />
-                </PopoverContent>
-              </Popover>
-            </TooltipTrigger>
-            <TooltipContent>
-              Upload File
-            </TooltipContent>
-           
-          </Tooltip>
-        </div>   */}
         
       </div>
     </form>
