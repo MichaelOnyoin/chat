@@ -16,7 +16,7 @@ export interface ClientMessage {
   text: ReactNode;
 }
 
-const ASSISTANT_ID = 'asst_kfVvb1rahyvYHXoSQJNnBtvy';
+const ASSISTANT_ID = process.env.ASSISTANT_ID || '';
 let THREAD_ID = '';
 let RUN_ID = '';
 

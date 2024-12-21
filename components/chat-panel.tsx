@@ -53,7 +53,7 @@ export function ChatPanel({
     {
       heading: 'Having trouble with your mental health ',
       subheading: `Talk to our Personal AI Therapist`,
-      message: `Having trouble with your mental health,talk to our Personal AI Therapist ?`
+      message: `Having trouble with your mental health, talk to our Personal AI Therapist ?`
     }
   ]
 

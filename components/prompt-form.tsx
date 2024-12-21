@@ -107,7 +107,7 @@ export function PromptForm({
             <TooltipTrigger asChild>
               <Button type="submit" size="icon" disabled={input === ''}>
                 {/* <IconArrowElbow /> */}
-                <IconPaperPlane/>
+                <IconPaperPlane className='-rotate-45'/>
                 <span className="sr-only">Send message</span>
               </Button>
             </TooltipTrigger>

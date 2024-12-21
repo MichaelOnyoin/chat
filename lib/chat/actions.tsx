@@ -10,7 +10,7 @@ import {
   
 } from 'ai/rsc'
 import { openai } from '@ai-sdk/openai'
-//import { tool } from 'ai'
+//import { AssistantResponse, tool } from 'ai'
 import {
   spinner,
   BotCard,
@@ -20,8 +20,8 @@ import {
   Purchase,
   
 } from '@/components/stocks'
-
-import { object, z } from 'zod'
+//import { OpenAI } from 'openai';
+import { z } from 'zod'
 import { EventsSkeleton } from '@/components/stocks/events-skeleton'
 import { Events } from '@/components/stocks/events'
 import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
@@ -41,9 +41,9 @@ import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
-
 // import { findRelevantContent } from '@/lib/chat/embeddings';
-// import { createResource } from '@/public/db/resources';
+//import { createResource } from '@/public/db/resources';
+//import { tool } from 'ai';
 
 
 
@@ -161,14 +161,14 @@ async function submitUserMessage(content: string) {
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     
     
-    If the user requests about the weather tell the user will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
+    If the user requests about the weather tell the user he will be provided with a prompt to input the city, then call \`get_city_weather\` to show the weather UI.
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
     If a user asks for something that requires most recent or real-time events tell the user you need to search the internet, then call \`search_the_internet\` then summarize the results you got.
     If the user wants to scrap a certain website tell the user to provide the website's url then, call \`scrapper\`
-    If the user asks about himself, then call \`getDatabase\` , if the information is not available tell the user to add it.
+    If the user asks for a therapist, then call \`therapist\` .
     If user tells you about himself, then call \`addResource\` ,then say you have stored that information about him.
     If the user wants to sell stock, or complete another impossible task, respond that you are an AI Chatbot in training and don't have that capability yet.
 
@@ -300,9 +300,9 @@ async function submitUserMessage(content: string) {
               model: "gpt-3.5-turbo", // You can also use gpt-3.5 or other models
               //prompt: `Summarize the following search results:\n${summarizedResults}`,
               messages: [
-                          {"role": "user", "content": `Summarize the following search results:\n${summarizedResults}`}
+                          {"role": "user", "content": `Summarize the following search results and give 1 relevant link:\n${summarizedResults}`}
                         ],
-              max_tokens: 200
+              max_tokens: 600
             }, {
               headers: {
                 'Authorization': `Bearer ${API}`,
@@ -350,16 +350,8 @@ async function submitUserMessage(content: string) {
       
               <BotCard>
                 
-                {/* {result1.map((result1:any, index:any) => (
-                  <div key={index} className="mb-4">
-                    <h2>{index + 1}. {result1.title}</h2>
-                    <p>Description: {result1.description}</p>
-                    <p>Snippet: {result1.extra_snippets}</p>
-                    <p>Link: <a className='hover:bg-sky-700 text-blue-500' href={result1.url}>{result1.url}</a></p>
-                  </div>
-              ))} */}
               <div>
-                <p>Search: {summary}</p>
+                <p>Search Results: {summary}</p>
               </div>
                
               </BotCard>
@@ -379,14 +371,14 @@ async function submitUserMessage(content: string) {
           const targetUrl: string = encodeURIComponent(url);
           const render: string = "true";
           const returnJSON = "true";
-          const output = 'markdown'
+          //const output = 'markdown'
           //Scrape.do does support markdown output for LLM data training or other necessary purposes. You can use the output=markdown parameter to obtain the output in markdown format when the response content-type is text/html.
 
-          //&render=${render}  &output=markdown
+          //&render=${render}  
 
           const config= {
             method: 'GET',
-            url: `https://api.scrape.do?token=${token}&url=${targetUrl}`,
+            url: `https://api.scrape.do?token=${token}&url=${targetUrl}&output=markdown`,
             headers: {}
           };
           
@@ -394,43 +386,24 @@ async function submitUserMessage(content: string) {
           
           const scrap = await response.data;
 
-          // const parsedData = parseScrapedData(scrap.data);
-          // await storeScrapedData(parsedData);
+          const API = process.env.OPENAI_API_KEY;
+            const openaiResponse = await axios.post('https://api.openai.com/v1/chat/completions', {
+              model: "gpt-3.5-turbo", // You can also use gpt-3.5 or other models
+              //prompt: `Summarize the following search results:\n${summarizedResults}`,
+              messages: [
+                          {"role": "user", "content": `Answer questions about this web-scrapped data:\n${scrap}`}
+                        ],
+              max_tokens: 1000
+            }, {
+              headers: {
+                'Authorization': `Bearer ${API}`,
+                'Content-Type': 'application/json'
+              }
+            });
+        
+            // Return the summarized response text
+            const scrapper= openaiResponse.data.choices[0].message.content;
 
-          // async function storeScrapedData(scrap: { content: string }) {
-          //   // Store the scraped data into a database or in-memory state
-          //   await createResource(scrap);
-          //   console.log('Scraped data stored successfully');
-          // }
-          // function parseScrapedData(rawData:any) {
-          //   // Parse the raw data into a more structured format (e.g., an object with title, headings, paragraphs)
-          //   const parsedData = {
-          //     title: rawData.title || 'Untitled',
-          //     headings: rawData.headings || [],
-          //     content: rawData.paragraphs || [],
-          //     url: rawData.url || '',
-          //   };
-          //   return parsedData;
-          // }
-          // async function answerQuestionAboutWebsite(question:any, websiteData:any) {
-          //   // Simple logic to search for the answer in the website data
-          //   const { title, headings, content } = websiteData;
-          
-          //   // Check if the question relates to any title or headings
-          //   let answer = '';
-          //   if (title.toLowerCase().includes(question.toLowerCase())) {
-          //     answer = `The website's title is: ${title}`;
-          //   } else {
-          //     // Search through headings and content to find a relevant answer
-          //     answer = headings.find((heading:any) => heading.toLowerCase().includes(question.toLowerCase())) ||
-          //              content.find((paragraph:any) => paragraph.toLowerCase().includes(question.toLowerCase())) ||
-          //              'I could not find a specific answer. Try rephrasing your question.';
-          //   }
-            
-          //   return answer;
-          // }
-          
-          
           yield (
             <BotCard>   
               <SpinnerMessage />
@@ -467,7 +440,7 @@ async function submitUserMessage(content: string) {
                     type: 'tool-result',
                     toolName: 'scrapper',
                     toolCallId,
-                    result: scrap
+                    result: scrapper
                   }
                 ]
               }
@@ -476,32 +449,54 @@ async function submitUserMessage(content: string) {
           return(
       
               <BotCard>
-                <p>The data from the website has been processed and stored. You can now ask questions about it!</p>
-               
-                <p>{scrap.search('news')}</p>
-                <p>{scrap.name}</p>
-                <p>{scrap}</p>
-
-               {/* {scrap} */}
+                <p>The data from the website has been processed and stored. You can now ask questions about it!</p>        
+                <p>{scrapper}</p>
               </BotCard>
             
-          )
-
-         
+          )        
         }
       },
-      image :{
-        description: 'get information about the image and describe it, and answer question related to the image',
+      therapist :{
+        description: 'This is a therapist AI bot to help improve user mental health',
         parameters: z.object({ 
-               question: z.string().describe('the image'),
-              // image: z.object().describe('')
+               question: z.string().describe('the problem'),
                }).required(),
         generate: async function* ({question }) {
-          //const { image } = await request.json();
-          //  const response3 = findRelevantContent(question);
-          // const {image}= 'hjf'
-          //  const stream = (await response3);
-           
+          const API = process.env.OPENAI_API_KEY;
+          const assistant_id = process.env.ASSISTANT_ID ||'';
+          // const openai = new OpenAI({
+          //   apiKey:API
+          // });
+          // const myAssistant = await openai.beta.assistants.retrieve(
+          //     `${assistant_id}`,
+              
+          // );
+
+          // const assistant = await openai.beta.assistants.create({
+          //   name: "Financial Analyst Assistant",
+          //   instructions: "You are an expert financial analyst. Use you knowledge base to answer questions about audited financial statements.",
+          //   model: "gpt-4o",
+          //   tools: [{ type: "file_search" }],
+          // });
+          // console.log(assistant);
+
+          const openaiResponse = await axios.post(`https://api.openai.com/v1/assistants/${assistant_id}`, {
+            model: "gpt-4o-mini", // You can also use gpt-3.5 or other models
+           // prompt: `Summarize the following search results:\n${summarizedResults}`,
+            messages: [
+                        {"role": "user", "content": ` ${question}:\n `}
+                      ],
+            max_tokens: 200
+          }, {
+            headers: {
+              'Authorization': `Bearer ${API}`,
+              'Content-Type': 'application/json'
+            }
+          });
+      
+          // Return the summarized response text
+          const result = openaiResponse.data.choices[0].message.content;
+
           yield (
             <BotCard>   
               <SpinnerMessage />
@@ -518,20 +513,15 @@ async function submitUserMessage(content: string) {
               ...aiState.get().messages,
               {
                 id: nanoid(),
-                role: 'user',
+                role: 'assistant',
                 content: [
                   {
-                    type: 'text',
-                    text: 'Whats in this image',
-                    //toolCallId,
-                    //args: { question }
-                  },
-                  {
-                   type: 'image',
-                   //image: image,
-                   image:'https://res.cloudinary.com/dbfydxolq/image/upload/v1724139711/cld-sample-3.jpg',
-                   
-                   }
+                    type: 'tool-call',
+                    toolName: 'therapist',
+                    toolCallId,
+                    args: { question }
+                  }
+                     
                 ]
               },
               {
@@ -540,7 +530,7 @@ async function submitUserMessage(content: string) {
                 content: [
                   {
                     type: 'tool-result',
-                    toolName: 'image',
+                    toolName: 'therapist',
                     toolCallId,
                     result: question
                   }
@@ -555,7 +545,7 @@ async function submitUserMessage(content: string) {
            <BotCard>
               <div>
               {question}
-              <h1>Hello</h1>
+              <p className='text-slate-600 text-lg'> {result}</p>
               </div>
            </BotCard>
           )
@@ -600,34 +590,7 @@ async function submitUserMessage(content: string) {
           await sleep(1000)
 
           const toolCallId = nanoid()
-          // if(result){
-          //   aiState.done({
-          //     ...aiState.get(),
-          //     messages: [
-          //       ...aiState.get().messages,
-          //       {
-          //         id: nanoid(),
-          //         role: 'assistant',
-          //         content: 'Resource added successfully!',
-          //       },
-          //     ],
-          //   });
-          // }else {
-          //   // ... handle the error case
-          //   aiState.done({
-          //     ...aiState.get(),
-          //     messages: [
-          //       ...aiState.get().messages,
-          //       {
-          //         id: nanoid(),
-          //         role: 'assistant',
-          //         content: 'Error adding resource: ' +result
-          //         ,
-          //       },
-          //     ],
-          //   });
-          // }
-
+          
           aiState.done({
             ...aiState.get(),
             messages: [
